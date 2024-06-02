@@ -1,0 +1,19 @@
+[project]
+name = "subplant"
+authors = [
+    { name = "alpha-tango-kilo", email = "git@heyatk.com" },
+]
+dependencies = [
+    "pymkv2==2.0.4",
+]
+dynamic = ["version"]
+
+[project.scripts]
+subplant = "subplant.__main__:clap"
+
+[build-system]
+requires = ["setuptools>=61.2", "setuptools_scm", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "src/subplant/_version.py"
