@@ -1,11 +1,8 @@
 [project]
 name = "subplant"
-authors = [
-    { name = "alpha-tango-kilo", email = "git@heyatk.com" },
-]
-dependencies = [
-    "pymkv2==2.0.4",
-]
+authors = [{ name = "alpha-tango-kilo", email = "git@heyatk.com" }]
+requires-python = ">=3.10"
+dependencies = ["pymkv2==2.0.4", "python-ron==0.2.5", "cattrs==23.2.3"]
 dynamic = ["version"]
 
 [project.scripts]
@@ -17,3 +14,17 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 write_to = "src/subplant/_version.py"
+
+[tool.ruff]
+line-length = 80
+indent-width = 4
+target-version = "py310"
+
+[tool.ruff.format]
+quote-style = "double"
+line-ending = "lf"
+
+# https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#isort
+[tool.isort]
+profile = "black"
+known_first_party = "subplant"

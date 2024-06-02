@@ -1,35 +1,36 @@
 #!/usr/bin/env python3
 
-import subprocess
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import Protocol
 
-# https://gitbib.github.io/pymkv2/
-from pymkv import MKVFile
+from subplant import __version__ as VERSION
+from subplant.extract import extract
 
-from . import __version__ as VERSION
+"""
+TODO: dir structure
+TODO: can I see which attachments are used by which subtitle lang?
 
+file_stem/
+    info.ron
+    sub_lang.ext
+    attachments/
+        blah.ttf
 
-class ExtractArgs(Protocol):
-    mkv_file: Path
-
-
-def mkvextract_tracks(mkv_path: Path, track_id: int, destination: Path):
-    subprocess.check_call(
-        ["mkvextract", "tracks", str(mkv_path), f"{track_id}:{destination}"]
-    )
-
-
-def extract(args: ExtractArgs) -> None:
-    mkv = MKVFile(args.mkv_file)
-    # TODO: do something sensible with multiple sub tracks
-    (sub_track,) = [track for track in mkv.tracks if track.track_type == "subtitles"]
-    mkvextract_tracks(
-        args.mkv_file,
-        sub_track.track_id,
-        args.mkv_file.with_suffix(".ass"),
-    )
+TODO: info file
+Episode {
+    season: int
+    episode: int
+    subs: {
+        sub_file: {
+            // NOTE: you can change anything here
+            lang: str
+            track_name: str
+            default: bool
+            etc.
+        }
+    }
+}
+"""
 
 
 def clap() -> None:
