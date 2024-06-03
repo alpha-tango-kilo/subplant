@@ -1,3 +1,4 @@
+import json
 import re
 import shutil
 import subprocess
@@ -5,9 +6,9 @@ from pathlib import Path
 from typing import Protocol
 
 import pyron
-from pymkv import MKVFile, MKVTrack
+from pymkv import MKVFile
 
-from subplant import SubtitleMetadata, VideoMetadata
+from subplant import AttachmentMetadata, SubtitleMetadata, VideoMetadata
 
 SEASON_EPISODE_REGEX = re.compile(r"S(\d{2,})E(\d{2,})")
 SUBTITLE_CODEC_EXTENSIONS = {
@@ -21,16 +22,17 @@ def guess_season_episode_from(file_name: str) -> tuple[int, int] | None:
         return int(season_str), int(episode_str)
 
 
-def process(mkv_path: Path, root_output_dir: Path):
+def process(mkv_path: Path, root_output_dir: Path) -> None:
     mkv = MKVFile(mkv_path)
     # TODO: handle no season/episode info
     season, episode = guess_season_episode_from(mkv_path.stem)
-    output_dir = root_output_dir / f"S{season:02}E{episode:02}"
+    output_dir = root_output_dir / f"S{season:02}E{episode:02}.subplant"
     if output_dir.is_dir():
         shutil.rmtree(str(output_dir))
     output_dir.mkdir(parents=True, exist_ok=False)
 
     # Get subtitle tracks, build map {Path => (file_name, SubtitleMetadata)}
+    # TODO: better file name uniqueness if multiple subs have the same language
     sub_map = {}
     for sub_track in mkv.tracks:
         if sub_track.track_type != "subtitles":
@@ -44,6 +46,7 @@ def process(mkv_path: Path, root_output_dir: Path):
         sub_extension = SUBTITLE_CODEC_EXTENSIONS.get(sub_track.track_codec, "")
         extracted_sub_path = output_dir / f"{sub_metadata.lang}{sub_extension}"
         print(f"Extracting {extracted_sub_path.relative_to(root_output_dir)}")
+        # TODO: group these and do them in one command execution
         mkvextract_tracks(
             mkv_path,
             sub_track.track_id,
@@ -51,20 +54,26 @@ def process(mkv_path: Path, root_output_dir: Path):
         )
         sub_map[extracted_sub_path] = (extracted_sub_path.name, sub_metadata)
 
+    # Extract attachments
+    attachments_dir = output_dir / "attachments"
+    # Build args for mkvextract, pulling all the fonts out in one go
+    args = [
+        f"{attachment['id']}:{attachments_dir / attachment['file_name']}"
+        for attachment in get_attachments(mkv_path)
+        if attachment["content_type"] == "application/x-truetype-font"
+    ]
+    print(f"Extracting {len(args)} attachment(s)")
+    subprocess.check_call(
+        ["mkvextract", "attachments", "--quiet", str(mkv_path), *args]
+    )
+
     # Build VideoMetadata
     video_metadata = VideoMetadata(season, episode, subs=dict(sub_map.values()))
     metadata_file = output_dir / "metadata.ron"
     metadata_file.write_text(pyron.to_string(video_metadata) + "\n")
 
-    # TODO: extract attachments
 
-
-def name_for_file(mkv_path: Path, sub_track: MKVTrack) -> Path:
-    assert sub_track.track_type == "subtitles"
-    mkv_path.with_suffix(SUBTITLE_CODEC_EXTENSIONS[sub_track.track_codec])
-
-
-def mkvextract_tracks(mkv_path: Path, track_id: int, destination: Path):
+def mkvextract_tracks(mkv_path: Path, track_id: int, destination: Path) -> None:
     subprocess.check_call(
         [
             "mkvextract",
@@ -74,6 +83,13 @@ def mkvextract_tracks(mkv_path: Path, track_id: int, destination: Path):
             f"{track_id}:{destination}",
         ]
     )
+
+
+def get_attachments(mkv_path: Path) -> list[AttachmentMetadata]:
+    json_info = subprocess.check_output(["mkvmerge", "-J", mkv_path])
+    all_metadata = json.loads(json_info)
+    assert isinstance(all_metadata, dict)
+    return all_metadata.get("attachments", [])
 
 
 class ExtractArgs(Protocol):

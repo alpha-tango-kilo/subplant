@@ -138,3 +138,5 @@ dmypy.json
 **/*.mkv
 **/*.ass
 **/*.ron
+**/*.ttf
+**/*.otf
