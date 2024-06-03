@@ -49,9 +49,17 @@ def clap() -> None:
         "extract", help="get subs out of a movie/series"
     )
     extract_subcommand.add_argument(
-        "mkv_file",
+        "work_path",
         type=Path,
-        help="the file to get stuff from",
+        help="the file or folder to get stuff from",
+    )
+    extract_subcommand.add_argument(
+        "-o",
+        "--output-dir",
+        type=Path,
+        default=Path("."),
+        metavar="DIR",
+        help="the folder to create all the loose files in",
     )
 
     args = parser.parse_args()

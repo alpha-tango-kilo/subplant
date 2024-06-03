@@ -1,26 +1,62 @@
+import re
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Protocol
 
-import cattrs
 import pyron
 from pymkv import MKVFile, MKVTrack
 
 from subplant import SubtitleMetadata, VideoMetadata
 
+SEASON_EPISODE_REGEX = re.compile(r"S(\d{2,})E(\d{2,})")
 SUBTITLE_CODEC_EXTENSIONS = {
     "SubStationAlpha": ".ass",
 }
 
 
-def process(mkv_path: Path):
+def guess_season_episode_from(file_name: str) -> tuple[int, int] | None:
+    if match := SEASON_EPISODE_REGEX.search(file_name):
+        season_str, episode_str = match.group(1, 2)
+        return int(season_str), int(episode_str)
+
+
+def process(mkv_path: Path, root_output_dir: Path):
     mkv = MKVFile(mkv_path)
-    # Guess season & episode
+    # TODO: handle no season/episode info
+    season, episode = guess_season_episode_from(mkv_path.stem)
+    output_dir = root_output_dir / f"S{season:02}E{episode:02}"
+    if output_dir.is_dir():
+        shutil.rmtree(str(output_dir))
+    output_dir.mkdir(parents=True, exist_ok=False)
+
     # Get subtitle tracks, build map {Path => (file_name, SubtitleMetadata)}
+    sub_map = {}
+    for sub_track in mkv.tracks:
+        if sub_track.track_type != "subtitles":
+            continue
+        sub_metadata = SubtitleMetadata(
+            lang=sub_track.language,
+            track_name=sub_track.track_name,
+            default=sub_track.default_track or False,
+            forced=sub_track.forced_track or False,
+        )
+        sub_extension = SUBTITLE_CODEC_EXTENSIONS.get(sub_track.track_codec, "")
+        extracted_sub_path = output_dir / f"{sub_metadata.lang}{sub_extension}"
+        print(f"Extracting {extracted_sub_path.relative_to(root_output_dir)}")
+        mkvextract_tracks(
+            mkv_path,
+            sub_track.track_id,
+            extracted_sub_path,
+        )
+        sub_map[extracted_sub_path] = (extracted_sub_path.name, sub_metadata)
+
     # Build VideoMetadata
-    # Build directory structure
-    # Extract attachments
-    # Extract subs
+    video_metadata = VideoMetadata(season, episode, subs=dict(sub_map.values()))
+    metadata_file = output_dir / "metadata.ron"
+    metadata_file.write_text(pyron.to_string(video_metadata) + "\n")
+
+    # TODO: extract attachments
 
 
 def name_for_file(mkv_path: Path, sub_track: MKVTrack) -> Path:
@@ -30,35 +66,28 @@ def name_for_file(mkv_path: Path, sub_track: MKVTrack) -> Path:
 
 def mkvextract_tracks(mkv_path: Path, track_id: int, destination: Path):
     subprocess.check_call(
-        ["mkvextract", "tracks", str(mkv_path), f"{track_id}:{destination}"]
+        [
+            "mkvextract",
+            "tracks",
+            "--quiet",
+            str(mkv_path),
+            f"{track_id}:{destination}",
+        ]
     )
 
 
 class ExtractArgs(Protocol):
-    mkv_file: Path
+    work_path: Path
+    output_dir: Path
 
 
 def extract(args: ExtractArgs) -> None:
-    # mkv = MKVFile(args.mkv_file)
-    # TODO: do something sensible with multiple sub tracks
-    # (sub_track,) = [
-    #     track for track in mkv.tracks if track.track_type == "subtitles"
-    # ]
-    # mkvextract_tracks(
-    #     args.mkv_file,
-    #     sub_track.track_id,
-    #     args.mkv_file.with_suffix(
-    #         SUBTITLE_CODEC_EXTENSIONS[sub_track.track_codec]
-    #     ),
-    # )
-    sub_file = SubtitleMetadata("und", "Commie", False)
-    sub_file_2 = cattrs.structure(
-        pyron.loads(pyron.to_string(sub_file)), SubtitleMetadata
-    )
-    assert sub_file == sub_file_2
-    vid_file = VideoMetadata(1, 1, {".": sub_file})
-    stringified = pyron.to_string(vid_file)
-    print(stringified)
-    vid_file_2 = cattrs.structure(pyron.loads(stringified), VideoMetadata)
-    print(pyron.to_string(vid_file_2))
-    assert vid_file == vid_file_2
+    if args.work_path.is_file():
+        print(f"Processing {args.work_path.name}")
+        process(args.work_path, args.output_dir)
+    elif args.work_path.is_dir():
+        for mkv_path in args.work_path.glob("*.mkv"):
+            print(f"Processing {mkv_path.name}")
+            process(mkv_path, args.output_dir)
+    else:
+        raise IOError("expected file/dir for work_path")

@@ -11,6 +11,7 @@ class SubtitleMetadata:
     lang: str
     track_name: str
     default: bool
+    forced: bool
 
 
 @dataclass
