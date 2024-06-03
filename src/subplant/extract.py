@@ -8,7 +8,13 @@ from typing import Protocol
 import pyron
 from pymkv import MKVFile
 
-from subplant import AttachmentMetadata, SubtitleMetadata, VideoMetadata
+from subplant import (
+    FONT_MIME_TYPE,
+    METADATA_FILE_NAME,
+    AttachmentMetadata,
+    SubtitleMetadata,
+    VideoMetadata,
+)
 
 SEASON_EPISODE_REGEX = re.compile(r"S(\d{2,})E(\d{2,})")
 SUBTITLE_CODEC_EXTENSIONS = {
@@ -60,7 +66,7 @@ def process(mkv_path: Path, root_output_dir: Path) -> None:
     args = [
         f"{attachment['id']}:{attachments_dir / attachment['file_name']}"
         for attachment in get_attachments(mkv_path)
-        if attachment["content_type"] == "application/x-truetype-font"
+        if attachment["content_type"] == FONT_MIME_TYPE
     ]
     print(f"Extracting {len(args)} attachment(s)")
     subprocess.check_call(
@@ -69,7 +75,7 @@ def process(mkv_path: Path, root_output_dir: Path) -> None:
 
     # Build VideoMetadata
     video_metadata = VideoMetadata(season, episode, subs=dict(sub_map.values()))
-    metadata_file = output_dir / "metadata.ron"
+    metadata_file = output_dir / METADATA_FILE_NAME
     metadata_file.write_text(pyron.to_string(video_metadata) + "\n")
 
 
