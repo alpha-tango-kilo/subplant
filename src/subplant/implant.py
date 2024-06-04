@@ -7,6 +7,7 @@ from subplant import (
     METADATA_FILE_NAME,
     VideoMetadata,
     get_video_resolution,
+    guess_season_episode_from,
 )
 
 
@@ -76,7 +77,26 @@ def implant(args: ImplantArgs) -> None:
         and args.subplant_package.suffix != ".subplant"
     ):
         # Multi mode
-        pass
+        videos = sorted(
+            (guess_season_episode_from(path.stem), path)
+            for path in args.work_path.glob("*.mkv")
+        )
+        subplants = sorted(
+            (guess_season_episode_from(path.stem), path)
+            for path in args.work_path.glob("*.subplant")
+        )
+        for ((vid_season, vid_epsiode), vid_path), (
+            (subs_season, subs_episode),
+            sub_path,
+        ) in zip(videos, subplants):
+            if vid_season == subs_season and vid_epsiode == subs_episode:
+                print(f"Implenting {sub_path} into {vid_path}")
+                process(vid_path, sub_path)
+            else:
+                raise ValueError(
+                    "couldn't line up videos and subplant packages"
+                )
+
     elif (
         args.work_path.is_file()
         and args.subplant_package.is_dir()

@@ -1,4 +1,5 @@
 import json
+import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,6 +15,7 @@ except ImportError:
 
 FONT_MIME_TYPE = "application/x-truetype-font"
 METADATA_FILE_NAME = "metadata.ron"
+SEASON_EPISODE_REGEX = re.compile(r"S(\d{2,})E(\d{2,})")
 
 
 @dataclass(frozen=True)
@@ -44,6 +46,12 @@ class AttachmentMetadata(TypedDict):
     id: int
     properties: dict[str, Any]
     size: int
+
+
+def guess_season_episode_from(file_name: str) -> tuple[int, int] | None:
+    if match := SEASON_EPISODE_REGEX.search(file_name):
+        season_str, episode_str = match.group(1, 2)
+        return int(season_str), int(episode_str)
 
 
 def get_video_resolution(mkv_path: Path) -> tuple[int, int]:

@@ -1,5 +1,4 @@
 import json
-import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -15,18 +14,12 @@ from subplant import (
     SubtitleMetadata,
     VideoMetadata,
     get_video_resolution,
+    guess_season_episode_from,
 )
 
-SEASON_EPISODE_REGEX = re.compile(r"S(\d{2,})E(\d{2,})")
 SUBTITLE_CODEC_EXTENSIONS = {
     "SubStationAlpha": ".ass",
 }
-
-
-def guess_season_episode_from(file_name: str) -> tuple[int, int] | None:
-    if match := SEASON_EPISODE_REGEX.search(file_name):
-        season_str, episode_str = match.group(1, 2)
-        return int(season_str), int(episode_str)
 
 
 def process(mkv_path: Path, root_output_dir: Path) -> None:
