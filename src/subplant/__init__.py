@@ -16,7 +16,7 @@ METADATA_FILE_NAME = "metadata.ron"
 @dataclass(frozen=True)
 class SubtitleMetadata:
     lang: str
-    track_name: str
+    track_name: str | None
     default: bool
     forced: bool
 

@@ -8,29 +8,9 @@ from subplant.extract import extract
 from subplant.implant import implant
 
 """
-TODO: dir structure
 TODO: can I see which attachments are used by which subtitle lang?
-
-file_stem/
-    info.ron
-    sub_lang.ext
-    attachments/
-        blah.ttf
-
-TODO: info file
-Episode {
-    season: int
-    episode: int
-    subs: {
-        sub_file: {
-            // NOTE: you can change anything here
-            lang: str
-            track_name: str
-            default: bool
-            etc.
-        }
-    }
-}
+TODO: aligning timing...
+TODO: rescaling subtitle size if resolution changes
 """
 
 

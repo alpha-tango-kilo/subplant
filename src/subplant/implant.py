@@ -21,23 +21,42 @@ def process(mkv_path: Path, subplant_package: Path) -> None:
     attachment_args = []
     for attachment in (subplant_package / "attachments").glob("*"):
         attachment_args.extend(
-            [
+            (
+                "--attachment-description",
+                "subplant imported attachment",
                 "--attachment-mime-type",
                 FONT_MIME_TYPE,
                 "--attach-file",
                 str(attachment),
-            ]
+            )
         )
 
     # Generate args to implant subs
-
+    sub_args = []
+    if sum(sub_metadata.default for sub_metadata in metadata.subs.values()) > 1:
+        raise ValueError("multiple default tracks specified")
+    for sub_file, sub_metadata in metadata.subs.items():
+        sub_args.extend(
+            (
+                "--language",
+                f"0:{sub_metadata.lang}",
+            )
+        )
+        if sub_metadata.track_name:
+            sub_args.extend(("--track-name", f"0:{sub_metadata.track_name}"))
+        if sub_metadata.default:
+            sub_args.extend(("--default-track-flag", "0"))
+        if sub_metadata.forced:
+            sub_args.extend(("--forced-display-flag", "0"))
+        sub_args.append(str(subplant_package / sub_file))
     subprocess.check_call(
         [
             "mkvmerge",
-            "--quiet",
+            # "--quiet",
             "-o",
             str(output_file),
-            mkv_path,
+            str(mkv_path),
+            *sub_args,
             *attachment_args,
         ]
     )
