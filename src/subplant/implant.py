@@ -1,8 +1,13 @@
-from pathlib import Path
 import subprocess
+from pathlib import Path
 from typing import Protocol
 
-from subplant import FONT_MIME_TYPE, METADATA_FILE_NAME, VideoMetadata
+from subplant import (
+    FONT_MIME_TYPE,
+    METADATA_FILE_NAME,
+    VideoMetadata,
+    get_video_resolution,
+)
 
 
 class ImplantArgs(Protocol):
@@ -16,6 +21,8 @@ def process(mkv_path: Path, subplant_package: Path) -> None:
     output_file.unlink(missing_ok=True)
     metadata_txt = (subplant_package / METADATA_FILE_NAME).read_text()
     metadata = VideoMetadata.loads(metadata_txt)
+    if metadata.resolution != get_video_resolution(mkv_path):
+        raise NotImplementedError("can't do subtitle rescaling")
 
     # Generate args to implant attachments
     attachment_args = []

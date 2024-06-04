@@ -1,4 +1,7 @@
+import json
+import subprocess
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, TypedDict
 
 import cattrs
@@ -25,6 +28,7 @@ class SubtitleMetadata:
 class VideoMetadata:
     season: int
     episode: int
+    resolution: tuple[int, int]
     # actually 👇 a path, but pyron doesn't support those
     subs: dict[str, SubtitleMetadata]
 
@@ -40,3 +44,18 @@ class AttachmentMetadata(TypedDict):
     id: int
     properties: dict[str, Any]
     size: int
+
+
+def get_video_resolution(mkv_path: Path) -> tuple[int, int]:
+    json_info = subprocess.check_output(["mkvmerge", "-J", mkv_path])
+    all_metadata = json.loads(json_info)
+    assert isinstance(all_metadata, dict)
+    for track in all_metadata["tracks"]:
+        properties = track.get("properties", {})
+        resolution = properties.get(
+            "display_dimensions", None
+        ) or properties.get("pixel_dimensions", None)
+        if resolution:
+            width, height = resolution.split("x", 1)
+            return int(width), int(height)
+    raise ValueError(f"unable to find resolution of {mkv_path}")

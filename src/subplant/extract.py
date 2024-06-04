@@ -14,6 +14,7 @@ from subplant import (
     AttachmentMetadata,
     SubtitleMetadata,
     VideoMetadata,
+    get_video_resolution,
 )
 
 SEASON_EPISODE_REGEX = re.compile(r"S(\d{2,})E(\d{2,})")
@@ -60,7 +61,7 @@ def process(mkv_path: Path, root_output_dir: Path) -> None:
         )
         sub_map[extracted_sub_path.name] = sub_metadata
         sub_extract_args.append(f"{sub_track.track_id}:{extracted_sub_path}")
-    
+
     # Extract subtitles
     print(f"Extracting {len(sub_map)} subtitle(s)")
     subprocess.check_call(
@@ -87,10 +88,12 @@ def process(mkv_path: Path, root_output_dir: Path) -> None:
     )
 
     # Build VideoMetadata
-    video_metadata = VideoMetadata(season, episode, sub_map)
+    video_metadata = VideoMetadata(
+        season, episode, get_video_resolution(mkv_path), sub_map
+    )
     metadata_file = output_dir / METADATA_FILE_NAME
     metadata_file.write_text(pyron.to_string(video_metadata) + "\n")
-    
+
 
 def get_attachments(mkv_path: Path) -> list[AttachmentMetadata]:
     json_info = subprocess.check_output(["mkvmerge", "-J", mkv_path])
