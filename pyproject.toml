@@ -1,9 +1,12 @@
 [project]
 name = "subplant"
+description = "Extract & implant subtitles"
 authors = [{ name = "alpha-tango-kilo", email = "git@heyatk.com" }]
 requires-python = ">=3.10"
 dependencies = ["pymkv2==2.0.4", "python-ron==0.2.5", "cattrs==23.2.3"]
 dynamic = ["version"]
+readme = "README.md"
+license = { file = "LICENSE" }
 
 [project.scripts]
 subplant = "subplant.__main__:clap"
