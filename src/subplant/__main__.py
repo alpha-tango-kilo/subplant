@@ -40,7 +40,7 @@ def clap() -> None:
         type=Path,
         default=Path("."),
         metavar="DIR",
-        help="the folder to create all the loose files in",
+        help="the folder to create subplant packages in",
     )
 
     # Note: keep in sync with implant.ImplantArgs

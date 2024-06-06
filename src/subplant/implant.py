@@ -88,7 +88,7 @@ def implant(args: ImplantArgs) -> None:
         for ((vid_season, vid_epsiode), vid_path), (
             (subs_season, subs_episode),
             sub_path,
-        ) in zip(videos, subplants):
+        ) in zip(videos, subplants):  # type: ignore
             if vid_season == subs_season and vid_epsiode == subs_episode:
                 print(f"Implenting {sub_path} into {vid_path}")
                 process(vid_path, sub_path)
