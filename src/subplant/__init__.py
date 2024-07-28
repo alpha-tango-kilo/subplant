@@ -1,10 +1,9 @@
 import json
 import re
 import subprocess
-from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Generator, TypedDict
+from typing import Any, Generator, NamedTuple, TypedDict
 
 import cattrs
 import pyron
@@ -70,7 +69,9 @@ def get_video_resolution(mkv_path: Path) -> tuple[int, int]:
     raise ValueError(f"unable to find resolution of {mkv_path}")
 
 
-ImplantWork = namedtuple("ImplantWork", ("target", "subplant"))
+class ImplantWork(NamedTuple):
+    target: Path
+    subplant: Path
 
 
 def discover_implant_work(
