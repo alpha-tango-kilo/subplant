@@ -7,6 +7,7 @@ from subplant import __version__ as VERSION
 from subplant.bitrate import bitrate
 from subplant.extract import extract
 from subplant.implant import implant
+from subplant.sidecar import sidecar
 
 
 def clap() -> None:
@@ -65,12 +66,30 @@ def clap() -> None:
         help="the file or folder with the video files",
     )
 
+    # Note: keep in sync with sidecar.SidecarArgs
+    sidecar_subcommand = subparsers.add_parser(
+        "sidecar",
+        help="map a .subplant package into sidecar files",
+    )
+    sidecar_subcommand.add_argument(
+        "work_path",
+        type=Path,
+        help="the file or folder with the video files",
+    )
+    sidecar_subcommand.add_argument(
+        "subplant_package",
+        type=Path,
+        help="the .subplant directory, or a directory containing them",
+    )
+
     args = parser.parse_args()
     match args.subcommand:
         case "extract":
             extract(args)
         case "implant":
             implant(args)
+        case "sidecar":
+            sidecar(args)
         case "bitrate":
             bitrate(args)
         case _:

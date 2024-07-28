@@ -1,9 +1,10 @@
 import json
 import re
 import subprocess
+from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any, Generator, TypedDict
 
 import cattrs
 import pyron
@@ -67,3 +68,28 @@ def get_video_resolution(mkv_path: Path) -> tuple[int, int]:
             width, height = resolution.split("x", 1)
             return int(width), int(height)
     raise ValueError(f"unable to find resolution of {mkv_path}")
+
+
+ImplantWork = namedtuple("ImplantWork", ("target", "subplant"))
+
+
+def discover_implant_work(
+    subplants_dir: Path, target_dir: Path
+) -> Generator[ImplantWork]:
+    videos = sorted(
+        (guess_season_episode_from(path.stem), path)
+        for path in target_dir.glob("*.mkv")
+    )
+    subplants = sorted(
+        (guess_season_episode_from(path.stem), path)
+        for path in subplants_dir.glob("*.subplant")
+    )
+    for ((vid_season, vid_epsiode), vid_path), (
+        (subs_season, subs_episode),
+        sub_path,
+    ) in zip(videos, subplants):  # type: ignore
+        if vid_season == subs_season and vid_epsiode == subs_episode:
+            print(f"Implenting {sub_path} into {vid_path}")
+            yield ImplantWork(vid_path, sub_path)
+        else:
+            raise ValueError("couldn't line up videos and subplant packages")

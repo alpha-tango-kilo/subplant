@@ -6,8 +6,8 @@ from subplant import (
     FONT_MIME_TYPE,
     METADATA_FILE_NAME,
     VideoMetadata,
+    discover_implant_work,
     get_video_resolution,
-    guess_season_episode_from,
 )
 
 
@@ -77,25 +77,10 @@ def implant(args: ImplantArgs) -> None:
         and args.subplant_package.suffix != ".subplant"
     ):
         # Multi mode
-        videos = sorted(
-            (guess_season_episode_from(path.stem), path)
-            for path in args.work_path.glob("*.mkv")
-        )
-        subplants = sorted(
-            (guess_season_episode_from(path.stem), path)
-            for path in args.work_path.glob("*.subplant")
-        )
-        for ((vid_season, vid_epsiode), vid_path), (
-            (subs_season, subs_episode),
-            sub_path,
-        ) in zip(videos, subplants):  # type: ignore
-            if vid_season == subs_season and vid_epsiode == subs_episode:
-                print(f"Implenting {sub_path} into {vid_path}")
-                process(vid_path, sub_path)
-            else:
-                raise ValueError(
-                    "couldn't line up videos and subplant packages"
-                )
+        for target, subplant in discover_implant_work(
+            args.subplant_package, args.work_path
+        ):
+            process(target, subplant)
 
     elif (
         args.work_path.is_file()
