@@ -4,10 +4,6 @@ from typing import Protocol
 from pymediainfo import MediaInfo
 
 
-class BitrateArgs(Protocol):
-    work_path: Path
-
-
 def process_one(file: Path) -> None:
     def to_kbps(bps: int) -> int:
         return bps // 1024
@@ -28,6 +24,10 @@ def process_one(file: Path) -> None:
             f"  Audio #{index} ({track.language}): "
             f"{to_kbps(track.bit_rate)} kb/s {track.format}"
         )
+
+
+class BitrateArgs(Protocol):
+    work_path: Path
 
 
 def bitrate(args: BitrateArgs) -> None:
