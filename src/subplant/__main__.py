@@ -81,6 +81,19 @@ def clap() -> None:
         type=Path,
         help="the .subplant directory, or a directory containing them",
     )
+    mode_group = sidecar_subcommand.add_mutually_exclusive_group()
+    mode_group.add_argument(
+        "-s",
+        "--symlink",
+        action="store_true",
+        help="symlink files from .subplant next to target",
+    )
+    mode_group.add_argument(
+        "-c",
+        "--copy",
+        action="store_true",
+        help="copy files from .subplant next to target",
+    )
 
     args = parser.parse_args()
     match args.subcommand:
