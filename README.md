@@ -111,3 +111,8 @@ subplant implant "JoJo no Kimyou na Bouken - S01E18 (higher quality version).mkv
 Currently there's no way to change the name of the produced MKV file, it'll be the name of the original file with "+" added to the end
 
 You'll see the output of `mkvmerge` as it runs to give an indication of progress
+
+## Roadmap / Feature ideas
+
+1. Option to copy/symlink/move sub files to be Jellyfin-complicitly named sidecar files (when there are no attachments)
+2. Bitrate subcommand to print the video & audio track bitrates
