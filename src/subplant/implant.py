@@ -80,6 +80,7 @@ def implant(args: ImplantArgs) -> None:
         for target, subplant in discover_implant_work(
             args.subplant_package, args.work_path
         ):
+            print(f"Implanting {subplant.name} into {target.name}")
             process(target, subplant)
 
     elif (
@@ -88,6 +89,7 @@ def implant(args: ImplantArgs) -> None:
         and args.subplant_package.suffix == ".subplant"
     ):
         # Single mode
+        print(f"Implanting {args.subplant_package.name} into {args.work_path.name}")
         process(args.work_path, args.subplant_package)
     else:
         raise ValueError(

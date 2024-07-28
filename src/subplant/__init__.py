@@ -3,7 +3,7 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Generator, NamedTuple, TypedDict
+from typing import Any, Iterator, NamedTuple, TypedDict
 
 import cattrs
 import pyron
@@ -76,7 +76,7 @@ class ImplantWork(NamedTuple):
 
 def discover_implant_work(
     subplants_dir: Path, target_dir: Path
-) -> Generator[ImplantWork]:
+) -> Iterator[ImplantWork]:
     videos = sorted(
         (guess_season_episode_from(path.stem), path)
         for path in target_dir.glob("*.mkv")
@@ -90,7 +90,6 @@ def discover_implant_work(
         sub_path,
     ) in zip(videos, subplants):  # type: ignore
         if vid_season == subs_season and vid_epsiode == subs_episode:
-            print(f"Implenting {sub_path} into {vid_path}")
             yield ImplantWork(vid_path, sub_path)
         else:
             raise ValueError("couldn't line up videos and subplant packages")
