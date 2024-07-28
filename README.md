@@ -1,7 +1,8 @@
 # `subplant` - extract & implant subtitles
 
 A relatively quick & dirty CLI tool to pull higher quality subtitles from lower quality videos and stick them into higher quality videos.
-**This tool is build on top of [MKVToolnix](https://mkvtoolnix.download/) and requires its commandline utilities `mkvmerge` & `mkvextract` to be available in `$PATH`**
+**This tool is build on top of [MKVToolnix](https://mkvtoolnix.download/) and requires its commandline utilities `mkvmerge` & `mkvextract` to be available in `$PATH`**.
+To use the `bitrate` subcommand, [MediaInfo](https://mediaarea.net/en/MediaInfo) also needs to be in `$PATH`
 
 Supports:
   - `.mkv` files with `.ass` subtitles, with attachments

@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 from subplant import __version__ as VERSION
+from subplant.bitrate import bitrate
 from subplant.extract import extract
 from subplant.implant import implant
 
@@ -53,14 +54,27 @@ def clap() -> None:
         help="the .subplant directory, or a directory containing them",
     )
 
+    # Note: keep in sync with bitrate.BitrateArgs
+    bitrate_subcommand = subparsers.add_parser(
+        "bitrate",
+        help="print bitrate information for video & audio tracks",
+    )
+    bitrate_subcommand.add_argument(
+        "work_path",
+        type=Path,
+        help="the file or folder with the video files",
+    )
+
     args = parser.parse_args()
     match args.subcommand:
-        case None:
-            print("not yet supported")
         case "extract":
             extract(args)
         case "implant":
             implant(args)
+        case "bitrate":
+            bitrate(args)
+        case _:
+            parser.print_usage()
 
 
 if __name__ == "__main__":
