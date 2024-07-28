@@ -28,8 +28,8 @@ class SubtitleMetadata:
 
 @dataclass
 class VideoMetadata:
-    season: int
-    episode: int
+    season: int | None
+    episode: int | None
     resolution: tuple[int, int]
     # actually 👇 a path, but pyron doesn't support those
     subs: dict[str, SubtitleMetadata]
