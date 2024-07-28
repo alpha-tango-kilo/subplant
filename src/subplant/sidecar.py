@@ -1,3 +1,4 @@
+import os
 import shutil
 from enum import StrEnum, auto
 from pathlib import Path
@@ -42,24 +43,35 @@ def gen_sidecar_path(
 def process_one(
     mkv_path: Path, subplant_package: Path, mode: SidecarMode
 ) -> None:
+    print(f"Adding subs for {mkv_path.stem}")
     if (subplant_package / "attachments").exists():
         print(f"{subplant_package.name} has attachments, skipping")
         return
+
     subplant_meta = VideoMetadata.loads(
         (subplant_package / METADATA_FILE_NAME).read_text()
     )
     for sub_path, sub_meta in subplant_meta.subs.items():
         sub_path = subplant_package / sub_path
         dest_path = gen_sidecar_path(mkv_path, sub_path.suffix, sub_meta)
+        if dest_path.exists():
+            print(f"{dest_path} exists, skipping...")
+            continue
 
+        common = os.path.commonpath((sub_path.absolute(), dest_path.absolute()))
         match mode:
-            # TODO: remove common prefixes in paths
             case SidecarMode.COPY:
                 shutil.copy(sub_path, dest_path)
-                print(f"Copied {sub_path} to {dest_path}")
+                print(
+                    f"Copied {sub_path.relative_to(common)} to",
+                    dest_path.relative_to(common),
+                )
             case SidecarMode.SYMLINK:
                 dest_path.symlink_to(sub_path)
-                print(f"Symlinked {sub_path} to {dest_path}")
+                print(
+                    f"Symlinked {sub_path.relative_to(common)} to",
+                    dest_path.relative_to(common),
+                )
             case _:
                 raise NotImplementedError(f"unsupported mode {mode}")
 
