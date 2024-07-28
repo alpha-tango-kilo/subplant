@@ -7,12 +7,6 @@ from subplant import __version__ as VERSION
 from subplant.extract import extract
 from subplant.implant import implant
 
-"""
-TODO: can I see which attachments are used by which subtitle lang?
-TODO: aligning timing...
-TODO: rescaling subtitle size if resolution changes
-"""
-
 
 def clap() -> None:
     parser = ArgumentParser()

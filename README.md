@@ -116,3 +116,6 @@ You'll see the output of `mkvmerge` as it runs to give an indication of progress
 
 1. Option to copy/symlink/move sub files to be Jellyfin-complicitly named sidecar files (when there are no attachments)
 2. Bitrate subcommand to print the video & audio track bitrates
+3. Realigning subtitles timewise? Probably a bottomless pit of despair
+4. Rescaling subs? Doesn't seem to be supported by libs, but theoretically is possible since Aegisub supports the feature
+5. Work out subtitle attachment dependencies and minimise imported dependencies? Bottomless pit of complexity for a small gain in edge cases
