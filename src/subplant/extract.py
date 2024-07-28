@@ -75,10 +75,13 @@ def process(mkv_path: Path, root_output_dir: Path) -> None:
         for attachment in get_attachments(mkv_path)
         if attachment["content_type"] == FONT_MIME_TYPE
     ]
-    print(f"Extracting {len(args)} attachment(s)")
-    subprocess.check_call(
-        ["mkvextract", "attachments", "--quiet", str(mkv_path), *args]
-    )
+    if len(args) > 0:
+        print(f"Extracting {len(args)} attachment(s)")
+        subprocess.check_call(
+            ["mkvextract", "attachments", "--quiet", str(mkv_path), *args]
+        )
+    else:
+        print("No attachments to extract")
 
     # Build VideoMetadata
     video_metadata = VideoMetadata(
