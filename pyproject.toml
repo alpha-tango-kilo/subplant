@@ -6,8 +6,9 @@ requires-python = ">=3.10"
 dependencies = [
     "cattrs==23.2.3",
     "pymediainfo==6.1.0",
-    "pymkv2==2.0.4",
+    "pymkv2==2.0.9",
     "python-ron==0.2.5",
+    "fontTools==4.57.0",
 ]
 dynamic = ["version"]
 readme = "README.md"

@@ -5,6 +5,7 @@ from pathlib import Path
 
 from subplant import __version__ as VERSION
 from subplant.bitrate import bitrate
+from subplant.check import check
 from subplant.extract import extract
 from subplant.implant import implant
 from subplant.sidecar import sidecar
@@ -92,7 +93,17 @@ def clap() -> None:
         "-c",
         "--copy",
         action="store_true",
-        help="copy files from .subplant next to target",
+        help="copy files from .subplant next to target (default)",
+    )
+
+    check_subcommand = subparsers.add_parser(
+        "check",
+        help="check for missing attachments",
+    )
+    check_subcommand.add_argument(
+        "subplant_package",
+        type=Path,
+        help="the .subplant directory, or a directory containing them",
     )
 
     args = parser.parse_args()
@@ -105,6 +116,8 @@ def clap() -> None:
             sidecar(args)
         case "bitrate":
             bitrate(args)
+        case "check":
+            check(args)
         case _:
             parser.print_usage()
 
