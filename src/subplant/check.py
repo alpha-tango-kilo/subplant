@@ -6,7 +6,7 @@ from fontTools.ttLib import TTFont
 
 from subplant import VideoMetadata
 
-FONT_REGEX = re.compile(r"\\fn(?P<font_name>[^\\]+)\\")
+FONT_REGEX = re.compile(r"\\fn(?P<font_name>.+?)[\\}\n]")
 
 
 def get_font_names(attachments_dir: Path) -> set[str]:
