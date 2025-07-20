@@ -1,3 +1,5 @@
+> ⚠️ This repo has been archived as `subplant` has been merged with [`anime-fix`](https://codeberg.org/alpha-tango-kilo/anime-fix) ⚠️
+
 # `subplant` - extract & implant subtitles
 
 A relatively quick & dirty CLI tool to pull higher quality subtitles from lower quality videos and stick them into higher quality videos.
